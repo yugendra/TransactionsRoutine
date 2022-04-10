@@ -1,0 +1,143 @@
+swagger: "2.0"
+info:
+  title: "Transactions Routine"
+  version: "1.0.0"
+  description: "A service to store all the customer transactions. Each cardholder (customer) has an account with their data. For each operation done by the customer a transaction is created and associated with their respective account. Each transaction has a specific type (normal purchase, withdrawal, credit voucher or purchase with installments)
+  
+   
+    Transactions of type purchase and withdrawal are registered with negative amounts, while transactions of credit voucher are registered with positive value."
+tags:
+- name: "Account"
+  description: "Account APIs"
+- name: "Transaction"
+  description: "Transaction APIs"
+
+paths:
+  /account:
+    post:
+      tags:
+      - "Account"
+      summary: "Add a new account"
+      description: "Create a new user account for given document number. Document number should be unique for each user. Returns new user id along with document number if user account is craeted successfully else return error."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account information"
+        required: true
+        schema:
+          $ref: "#/definitions/accountRequest"
+      responses:
+        "200":
+          description: "Account created successfully"
+          schema:
+            $ref: "#/definitions/accountResponse"
+        "400":
+          description: "Bad Request"
+        "500":
+          description: "Internal Server Error"
+  /account/{account_id}:
+    get:
+      tags:
+      - "Account"
+      summary: "Fetch account information"
+      description: "If account exists in database then this API will return its id and document number else return error."
+      parameters:
+      - in: path
+        name: account_id
+        type: integer
+        required: true
+        description: "Numeric ID of the account to get"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+              $ref: "#/definitions/accountResponse"
+        "400":
+          description: "Bad Request"
+        "500":
+          description: "Internal Server Error. Most probably user account is not present."
+  /transaction:
+    post:
+      tags:
+      - "Transaction"
+      summary: "Add a new transaction"
+      description: "Append new transaction in database for existing user. If transaction is created in database successfully then return transaction id along with other information else return error."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Transaction information"
+        required: true
+        schema:
+          $ref: "#/definitions/transactionRequest"
+      responses:
+        "200":
+          description: "Account created successfully"
+          schema:
+            $ref: "#/definitions/transactionResponse"
+        "400":
+          description: "Bad Request"
+        "500":
+          description: "Internal Server Error. Most probably data is not valid or user account is not present."
+definitions:
+  accountRequest:
+    type: "object"
+    required:
+    - "document_number"
+    properties:
+      document_number:
+        type: "integer"
+        format: "uint"
+        example: 1234567890
+  accountResponse:
+    type: "object"
+    properties:
+      account_id:
+        type: "integer"
+        format: "uint"
+        example: 1
+      document_number:
+        type: "integer"
+        format: "uint"
+        example: 1234567890
+  transactionRequest:
+    type: "object"
+    required:
+    - "account_id"
+    - "operation_type"
+    - "amount"
+    properties:
+      account_id:
+        type: "integer"
+        format: "uint"
+        example: 1
+      operation_type:
+        type: "string"
+        enum: ["Normal Purchase", "Purchase With Installments", "Withdrawal", "Credit Voucher"]
+        example: "Normal Purchase"
+      amount:
+        type: "number"
+        format: "float"
+        example: -123.45
+  transactionResponse:
+    type: "object"
+    properties:
+      transaction_id:
+        type: "integer"
+        format: "uint"
+        example: 1
+      account_id:
+        type: "integer"
+        format: "uint"
+        example: 1
+      operation_type:
+        type: "string"
+        enum: ["Normal Purchase", "Purchase With Installments", "Withdrawal", "Credit Voucher"]
+        example: "Normal Purchase"
+      amount:
+        type: "number"
+        format: "float"
+        example: -123.45
+      event_date:
+        type: "string"
+        format: "date-time"
+        example: "2022-04-10T10:43:41.817552Z"

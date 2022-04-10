@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+  transactions_routine:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    environment:
+      DBUSER: postgres
+      DBPASS: postgres
+      DBPORT: 5432
+      DBNAME: transactionsroutine
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: transactionsroutine
+    ports:
+      - "5432:5432"
